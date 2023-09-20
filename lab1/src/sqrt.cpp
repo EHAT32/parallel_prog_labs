@@ -16,11 +16,14 @@ void sqrt_array(float* arr, float* result, int size) {
 }
 
 int main(){
-    int size = 2048;
+    int size = 6;
     float arr[size], result[size];
     for (int i = 0; i < size; i++) {
         arr[i] = i;
     }
     sqrt_array(arr, result, size);
+    for (int i = 0; i < size; i++) {
+        std::cout << result[i] << std::endl;
+    }
     return 0;
 }
