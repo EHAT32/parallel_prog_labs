@@ -2,9 +2,6 @@
 #include <cstdlib>
 #include <iostream>
 #include <synchapi.h>
-// #include <unistd.h>
-// #include <io.h>
-
 
 struct ThreadData {
     int* row;
