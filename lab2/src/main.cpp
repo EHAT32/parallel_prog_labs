@@ -18,7 +18,7 @@ DWORD WINAPI threadProc(LPVOID lpParameter) {
     int flag = -1;
     for (int i = 0; i < data->col; i++)
     {
-        int value = rand() % 10;
+        int value = rand() % 100;
         row[i] = value;
         if (value % 2 == 1)
         {
