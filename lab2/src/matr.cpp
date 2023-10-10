@@ -1,5 +1,6 @@
 #include <Windows.h>
 #include <cstdlib>
+#include <handleapi.h>
 #include <iostream>
 #include <synchapi.h>
 
@@ -56,6 +57,9 @@ int main() {
     }
 
     WaitForMultipleObjects(row, threads, 1, 1e4);
+    for (int i = 0; i < row; i++) {
+        CloseHandle(threads[i]);
+    }
     // CloseHandle(threads);
     for (int i = 0; i < row; i++) {
         WaitForSingleObject(threads[i], 1e3); // wait till threads[i] is done 
