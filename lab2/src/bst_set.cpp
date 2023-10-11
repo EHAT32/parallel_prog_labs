@@ -15,74 +15,70 @@ class Set {
 private:
     TreeNode<T>* root;
 
-    // Helper function to insert a value into the BST
-    TreeNode<T>* insert(TreeNode<T>* current, T value) {
-        if (current == nullptr) {
+    TreeNode<T>* insert(TreeNode<T>* parentNode, T value) {
+        if (parentNode == nullptr) {
             return new TreeNode<T>(value);
         }
 
-        if (value < current->data) {
-            current->left = insert(current->left, value);
-        } else if (value > current->data) {
-            current->right = insert(current->right, value);
+        if (value < parentNode->data) {
+            parentNode->left = insert(parentNode->left, value);
+        } else if (value > parentNode->data) {
+            parentNode->right = insert(parentNode->right, value);
         }
 
-        return current;
+        return parentNode;
     }
 
-    // Helper function to check if a value exists in the BST
-    bool contains(TreeNode<T>* current, T value) {
-        if (current == nullptr) {
+    bool containsNode(TreeNode<T>* parentNode, T value) {
+        if (parentNode == nullptr) {
             return false;
         }
 
-        if (value == current->data) {
+        if (value == parentNode->data) {
             return true;
-        } else if (value < current->data) {
-            return contains(current->left, value);
+        } else if (value < parentNode->data) {
+            return containsNode(parentNode->left, value);
         } else {
-            return contains(current->right, value);
+            return containsNode(parentNode->right, value);
         }
     }
 
-    // Helper function to remove a value from the BST
-    TreeNode<T>* remove(TreeNode<T>* current, T value) {
-        if (current == nullptr) {
-            return current;
+    TreeNode<T>* remove(TreeNode<T>* parentNode, T value) {
+        if (parentNode == nullptr) {
+            return parentNode;
         }
 
-        if (value < current->data) {
-            current->left = remove(current->left, value);
-        } else if (value > current->data) {
-            current->right = remove(current->right, value);
+        if (value < parentNode->data) {
+            parentNode->left = remove(parentNode->left, value);
+        } else if (value > parentNode->data) {
+            parentNode->right = remove(parentNode->right, value);
         } else {
-            // Node with only one child or no child
-            if (current->left == nullptr) {
-                TreeNode<T>* temp = current->right;
-                delete current;
+            // if value == parentNode->data
+            if (parentNode->left == nullptr) {
+                TreeNode<T>* temp = parentNode->right;
+                delete parentNode;
                 return temp;
-            } else if (current->right == nullptr) {
-                TreeNode<T>* temp = current->left;
-                delete current;
+            } else if (parentNode->right == nullptr) {
+                TreeNode<T>* temp = parentNode->left;
+                delete parentNode;
                 return temp;
             }
 
-            // Node with two children: Get the inorder successor (smallest
-            // in the right subtree)
-            TreeNode<T>* temp = minValueNode(current->right);
+            //// if parentNode has two children
+            TreeNode<T>* temp = findMin(parentNode->right);
 
-            // Copy the inorder successor's content to this node
-            current->data = temp->data;
+            // Copy data to this node
+            parentNode->data = temp->data;
 
-            // Delete the inorder successor
-            current->right = remove(current->right, temp->data);
+            // Delete the node
+            parentNode->right = remove(parentNode->right, temp->data);
         }
 
-        return current;
+        return parentNode;
     }
 
-    // Helper function to find the node with the smallest value in a BST
-    TreeNode<T>* minValueNode(TreeNode<T>* node) {
+    //used for remove method
+    TreeNode<T>* findMin(TreeNode<T>* node) {
         TreeNode<T>* current = node;
         while (current && current->left != nullptr) {
             current = current->left;
@@ -93,33 +89,38 @@ private:
 public:
     Set() : root(nullptr) {}
 
-    // Add a value to the set
     bool add(T value) {
-        if (!contains(root, value)) {
+        if (!containsNode(root, value)) {
             root = insert(root, value);
             return true;
         }
         return false;
     }
 
-    // Remove a value from the set
     bool remove(T value) {
-        if (contains(root, value)) {
+        if (containsNode(root, value)) {
             root = remove(root, value);
             return true;
         }
         return false;
     }
 
-    // Check if a value exists in the set
-    bool contains(T value) {
-        return contains(root, value);
+    bool containsNode(T value) {
+        return containsNode(root, value);
     }
 };
 
 int main() {
-    Set<int> intSet;
+    Set<int> set;
     
+    set.add(30);
+    set.add(30);
+    set.add(0);
+    set.add(50);
+
+    std::cout << set.containsNode(0) << std::endl;
+    set.remove(0);
+    std::cout << set.containsNode(0) << std::endl;
 
     return 0;
 }
