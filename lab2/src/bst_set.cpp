@@ -3,11 +3,11 @@
 template <typename T>
 class TreeNode {
 public:
-    T data;
+    T value;
     TreeNode* left;
     TreeNode* right;
 
-    TreeNode(T value) : data(value), left(nullptr), right(nullptr) {}
+    TreeNode(T value_) : value(value_), left(nullptr), right(nullptr) {}
 };
 
 template <typename T>
@@ -20,9 +20,9 @@ private:
             return new TreeNode<T>(value);
         }
 
-        if (value < parentNode->data) {
+        if (value < parentNode->value) {
             parentNode->left = insert(parentNode->left, value);
-        } else if (value > parentNode->data) {
+        } else if (value > parentNode->value) {
             parentNode->right = insert(parentNode->right, value);
         }
 
@@ -34,9 +34,9 @@ private:
             return false;
         }
 
-        if (value == parentNode->data) {
+        if (value == parentNode->value) {
             return true;
-        } else if (value < parentNode->data) {
+        } else if (value < parentNode->value) {
             return containsNode(parentNode->left, value);
         } else {
             return containsNode(parentNode->right, value);
@@ -48,12 +48,12 @@ private:
             return parentNode;
         }
 
-        if (value < parentNode->data) {
+        if (value < parentNode->value) {
             parentNode->left = remove(parentNode->left, value);
-        } else if (value > parentNode->data) {
+        } else if (value > parentNode->value) {
             parentNode->right = remove(parentNode->right, value);
         } else {
-            // if value == parentNode->data
+            // if value == parentNode->value
             if (parentNode->left == nullptr) {
                 TreeNode<T>* temp = parentNode->right;
                 delete parentNode;
@@ -67,11 +67,11 @@ private:
             //// if parentNode has two children
             TreeNode<T>* temp = findMin(parentNode->right);
 
-            // Copy data to this node
-            parentNode->data = temp->data;
+            // Copy value to this node
+            parentNode->value = temp->value;
 
             // Delete the node
-            parentNode->right = remove(parentNode->right, temp->data);
+            parentNode->right = remove(parentNode->right, temp->value);
         }
 
         return parentNode;
@@ -114,7 +114,7 @@ int main() {
     Set<int> set;
     
     set.add(30);
-    set.add(30);
+    set.add(30); //won't be added
     set.add(0);
     set.add(50);
 

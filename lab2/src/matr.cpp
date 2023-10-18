@@ -7,8 +7,8 @@
 struct ThreadData {
     int* row;
     int col;
-    int seed;
     int product;
+    int seed;
 };
 
 DWORD WINAPI threadProc(LPVOID lpParameter) {
@@ -39,7 +39,7 @@ int main() {
     int matrix[row][col];
     HANDLE threads[row];
     ThreadData data[row];
-    for (int i = 0; i < row; i++) // set initial data for threads 
+    for (int i = 0; i < row; i++) // set initial data
     {
         data[i].row = matrix[i];
         data[i].col = col;
@@ -62,7 +62,7 @@ int main() {
     }
     // CloseHandle(threads);
     for (int i = 0; i < row; i++) {
-        WaitForSingleObject(threads[i], 1e3); // wait till threads[i] is done 
+        WaitForSingleObject(threads[i], 1e3);
         std::cout << "row " << i << ": ";
         for (int j = 0; j < col; j++) {
             std::cout << matrix[i][j] << " ";
