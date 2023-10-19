@@ -2,7 +2,7 @@
 #include <iostream>
 
 int main() {
-    int num_threads = 13;
+    int num_threads = 12;
     omp_set_num_threads(num_threads);
 
     #pragma omp parallel
