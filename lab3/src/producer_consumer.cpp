@@ -14,6 +14,9 @@ class Message{
 
         T get(){
             std::lock_guard<std::mutex> lock(mtx);
+            if (pool.empty()) {
+                return -1;
+            }
 
             int val = this->pool.back();
             pool.pop_back();
