@@ -28,9 +28,11 @@ public:
     int chairs;
     mutex mtx;
     condition_variable cv;
+    bool allBarbersAsleep;
 
     Barbershop(int c) {
         chairs = c;
+        allBarbersAsleep = false;
     }
 
     void addClient(Client c) {
@@ -49,6 +51,10 @@ public:
             unique_lock<mutex> lck(mtx);
             while (clients.empty()) {
                 cout << "Barber " << b.id << " is sleeping.\n";
+                if (allBarbersAsleep) {
+                    cout << "All barbers are asleep, closing shop.\n";
+                    return;
+                }
                 cv.wait(lck);
             }
             Client c = clients.front();
@@ -62,8 +68,8 @@ public:
 
 int main() {
     int numClients = 10;
-    int numChairs = 2;
-    int numBarbers = 2;
+    int numChairs = 3;
+    int numBarbers = 1;
 
     Barbershop b(numChairs);
 
@@ -79,11 +85,12 @@ int main() {
         this_thread::sleep_for(chrono::seconds(1));
     }
 
+    b.allBarbersAsleep = true;
+    b.cv.notify_all();
+
     for (int i = 0; i < numBarbers; i++) {
         barbers[i].join();
     }
-    cout << 10 << endl;
-
 
     return 0;
 }
