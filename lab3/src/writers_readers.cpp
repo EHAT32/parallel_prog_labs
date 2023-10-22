@@ -51,17 +51,16 @@ int main(){
     Message msg;
     std::vector<std::thread> threads;
 
-    // create writer threads
+    //writers
     for (int i = 0; i < 3; i++) {
         threads.emplace_back(writer, std::ref(msg), i);
     }
 
-    // create reader threads
+    //readers
     for (int i = 0; i < 2; i++) {
         threads.emplace_back(reader, std::ref(msg), i);
     }
 
-    // join all threads
     for (auto& thread : threads) {
         thread.join();
     }
