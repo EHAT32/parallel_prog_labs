@@ -25,13 +25,6 @@ class Message{
         std::vector<T> pool;
 };
 
-Message<int> shared_res;
-
 int main(){
-    std::thread t1([](){shared_res.set(1);});
-    std::thread t2([](){shared_res.get();});
-    
-    t1.join();
-    t2.join();
     return 0;
 }
