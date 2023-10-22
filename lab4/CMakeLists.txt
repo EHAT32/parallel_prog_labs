@@ -5,4 +5,4 @@ set(SOURCE_FILES
     src/philosphers.cpp
 )
 add_executable(barbershop src/barbershop.cpp)
-add_executable(philosphers src/philosphers.cpp)
+add_executable(philosphers src/philosophers.cpp)
