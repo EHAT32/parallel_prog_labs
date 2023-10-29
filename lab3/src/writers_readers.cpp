@@ -1,30 +1,31 @@
 #include <iostream>
 #include <mutex>
+#include <shared_mutex>
 #include <thread>
 #include <vector>
 
 class Message{
     public:
         void set(const int &val){
-            std::lock_guard<std::mutex> lock(mtx);
-            pool.push_back(val);
+            std::lock_guard<std::shared_mutex> lock(mtx_);
+            pool_.push_back(val);
             std::cout << "Set " << val << " from " << std::this_thread::get_id() << std::endl;
         }
 
         int get(){
-            std::lock_guard<std::mutex> lock(mtx);
-            if (pool.empty()) {
+            std::lock_guard<std::shared_mutex> lock(mtx_);
+            if (pool_.empty()) {
                 return -1;
             }
 
-            int val = this->pool.back();
-            pool.pop_back();
+            int val = this->pool_.back();
+            pool_.pop_back();
             std::cout << "Got " << val << " from " << std::this_thread::get_id() << std::endl;
             return val;
         }
     private:
-        std::mutex mtx;
-        std::vector<int> pool;
+        std::shared_mutex mtx_;
+        std::vector<int> pool_;
 };
 
 void writer(Message& msg, int id) {
