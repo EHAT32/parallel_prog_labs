@@ -6,3 +6,5 @@ set(SOURCE_FILES
 )
 add_executable(barbershop src/barbershop.cpp)
 add_executable(philosphers src/philosophers.cpp)
+add_executable(new_philosphers src/new_philosopher.cpp)
+set_target_properties(new_philosphers PROPERTIES CXX_STANDARD 17)
