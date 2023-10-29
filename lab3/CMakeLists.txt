@@ -6,3 +6,4 @@ set(SOURCE_FILES
 )
 add_executable(producer_consumer src/producer_consumer.cpp)
 add_executable(writers_readers src/writers_readers.cpp)
+add_executable(new_writers_readers src/new_writers_readers.cpp)

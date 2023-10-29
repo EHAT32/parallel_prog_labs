@@ -24,11 +24,6 @@ public:
 
 class Barbershop {
 public:
-    queue<Client> clients;
-    int chairs;
-    mutex mtx;
-    condition_variable cv;
-    bool allBarbersAsleep;
 
     Barbershop(int c) {
         chairs = c;
@@ -64,6 +59,12 @@ public:
             this_thread::sleep_for(chrono::seconds(2));
         }
     }
+
+    queue<Client> clients;
+    int chairs;
+    mutex mtx;
+    condition_variable cv;
+    bool allBarbersAsleep;
 };
 
 int main() {
