@@ -5,6 +5,8 @@
 #include <array>
 #include <vector>
 
+std::mutex cout_message;
+
 class Fork {
 public:
     Fork (){};
@@ -30,16 +32,22 @@ private:
     Fork& right_fork_;
 
     void think() {
-        std::cout << "Philosopher " << id_ << " is thinking" << std::endl;
-        std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+        {
+            std::lock_guard<std::mutex> lock(cout_message);
+            std::cout << "Philosopher " << id_ << " is thinking" << std::endl;
+        }
+        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
     }
 
     void eat() {
-        std::cout << "Philosopher " << id_ << " is hungry and trying to grab forks" << std::endl;
+        // std::cout << "Philosopher " << id_ << " is hungry and trying to grab forks" << std::endl;
         std::scoped_lock lock(left_fork_.mutex_, right_fork_.mutex_);
-        std::cout << "Philosopher " << id_ << " is eating" << std::endl;
-        std::this_thread::sleep_for(std::chrono::milliseconds(5000));
-        std::cout << "Philosopher " << id_ << " has finished eating" << std::endl;
+        {
+            std::lock_guard<std::mutex> lock(cout_message);
+            std::cout << "Philosopher " << id_ << " is eating" << std::endl;
+            std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+            std::cout << "Philosopher " << id_ << " has finished eating" << std::endl;
+        }
         // std::this_thread::sleep_for(std::chrono::milliseconds(1000));
     }
 };

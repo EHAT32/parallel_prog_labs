@@ -4,6 +4,7 @@
 #include <shared_mutex>
 #include <vector>
 
+
 class Message {
 public:
     void writer(int id) {
