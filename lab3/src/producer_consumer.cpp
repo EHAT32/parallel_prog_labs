@@ -3,16 +3,15 @@
 #include <thread>
 #include <vector>
 
-template<typename T>
 class Message{
     public:
-        void set(const T &val){
+        void set(const int &val){
             std::lock_guard<std::mutex> lock(mtx);
             pool.push_back(val);
             std::cout << "Set " << val << " from " << std::this_thread::get_id() << std::endl;
         }
 
-        T get(){
+        int get(){
             std::lock_guard<std::mutex> lock(mtx);
             if (pool.empty()) {
                 return -1;
@@ -25,14 +24,14 @@ class Message{
         }
     private:
         std::mutex mtx;
-        std::vector<T> pool;
+        std::vector<int> pool;
 };
 
-Message<int> shared_res;
+Message msg;
 
 int main(){
-    std::thread t1([](){shared_res.set(1);});
-    std::thread t2([](){shared_res.get();});
+    std::thread t1([](){msg.set(1);});
+    std::thread t2([](){msg.get();});
     
     t1.join();
     t2.join();

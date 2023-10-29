@@ -24,47 +24,47 @@ public:
 
 class Barbershop {
 public:
-
     Barbershop(int c) {
-        chairs = c;
+        chairs_ = c;
         allBarbersAsleep = false;
     }
 
     void addClient(Client c) {
-        unique_lock<mutex> lck(mtx);
-        if (clients.size() >= chairs) {
-            cout << "Client " << c.id << " left because there were no available chairs.\n";
+        unique_lock<mutex> lck(mtx_);
+        if (clients_.size() >= chairs_) {
+            cout << "Client " << c.id << " left because there were no available chairs." << endl;
             return;
         }
-        clients.push(c);
-        cout << "Client " << c.id << " arrived and is waiting.\n";
+        clients_.push(c);
+        cout << "Client " << c.id << " arrived and is waiting." << endl;
         cv.notify_one();
     }
 
     void barberWork(Barber b) {
         while (true) {
-            unique_lock<mutex> lck(mtx);
-            while (clients.empty()) {
-                cout << "Barber " << b.id << " is sleeping.\n";
+            unique_lock<mutex> lck(mtx_);
+            while (clients_.empty()) {
+                cout << "Barber " << b.id << " is sleeping." << endl;;
                 if (allBarbersAsleep) {
-                    cout << "All barbers are asleep, closing shop.\n";
+                    cout << "All barbers are asleep, closing shop." << endl;
                     return;
                 }
                 cv.wait(lck);
             }
-            Client c = clients.front();
-            clients.pop();
-            cout << "Barber " << b.id << " is cutting hair of client " << c.id << ".\n";
+            Client c = clients_.front();
+            clients_.pop();
+            cout << "Barber " << b.id << " is cutting hair of client " << c.id << endl;
             lck.unlock();
             this_thread::sleep_for(chrono::seconds(2));
         }
     }
 
-    queue<Client> clients;
-    int chairs;
-    mutex mtx;
     condition_variable cv;
     bool allBarbersAsleep;
+private:
+    queue<Client> clients_;
+    int chairs_;
+    mutex mtx_;
 };
 
 int main() {
