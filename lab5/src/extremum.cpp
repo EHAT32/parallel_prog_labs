@@ -7,6 +7,7 @@ template<typename T>
 T findMax(const std::vector<T>& vec){
     T maxVal = vec[0];
     #pragma omp parallel for
+    {
         for (int i = 0; i < vec.size(); i++) {
             #pragma omp critical
                 {
@@ -15,6 +16,7 @@ T findMax(const std::vector<T>& vec){
                     }
                 }
         }
+    }
     return maxVal;
 }
 
