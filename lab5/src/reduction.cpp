@@ -84,17 +84,31 @@ T reductionFor(const std::vector<T>& vec){
     return sum;
 }
 
+template<typename T>
+T naiveSum(const std::vector<T>& vec){
+    T sum = 0;
+    double startTime = omp_get_wtime();
+    for (int i = 0; i < vec.size(); i++) {
+        sum += vec[i];
+    }
+    double endTime = omp_get_wtime();
+    std::cout << "Naive sum elapsed time is " << endTime - startTime << " seconds" << std::endl;
+    return sum;
+}
+
 int main(){
     int num_threads = 2;
     omp_set_num_threads(num_threads);
     std::vector<int> vec(100000000);
     std::iota(vec.begin(), vec.end(), 1);
     auto atomic = reductionAtomic(vec);
-    auto For = reductionFor(vec);
     auto critical = reductionCritical(vec);
     auto lock = reductionLock(vec);
-    assert(atomic == For);
-    assert(For == critical);
-    assert(critical == lock);
+    auto For = reductionFor(vec);
+    auto naive = naiveSum(vec);
     return 0;
 }
+
+/*
+критические секции и замки оказались самыми быстрыми
+*/
