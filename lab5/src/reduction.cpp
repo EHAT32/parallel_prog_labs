@@ -14,13 +14,27 @@ T reductionAtomic(const std::vector<T>& vec){
         }
     }
     double endTime = omp_get_wtime();
-    std::cout << "Elapsed time is " << endTime - startTime << " seconds" << std::endl;
+    std::cout << "Atomic elapsed time is " << endTime - startTime << " seconds" << std::endl;
     return sum;
 }
 
 template<typename T>
 T reductionCritical(const std::vector<T>& vec){
     T sum = 0;
+    double startTime = omp_get_wtime();
+    #pragma omp parallel
+    {
+        T localSum = 0;
+        for (int i = 0; i < vec.size(); i++) {
+            localSum += vec[i];
+        }
+        #pragma omp critical
+        {
+            sum += localSum;
+        }
+    }
+    double endTime = omp_get_wtime();
+    std::cout << "Critical elapsed time is " << endTime - startTime << " seconds" << std::endl;
     return sum;
 }
 
@@ -36,5 +50,6 @@ int main(){
     std::vector<int> vec(100000000);
     std::iota(vec.begin(), vec.end(), 1);
     reductionAtomic(vec);
+    reductionCritical(vec);
     return 0;
 }
