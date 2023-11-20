@@ -6,7 +6,8 @@
 template<typename T>
 T findMax(const std::vector<T>& vec){
     T maxVal = vec[0];
-    #pragma omp parallel for
+    double startTime = omp_get_wtime();
+    #pragma omp parallel for shared(vec)
     {
         for (int i = 0; i < vec.size(); i++) {
             #pragma omp critical
@@ -17,11 +18,13 @@ T findMax(const std::vector<T>& vec){
                 }
         }
     }
+    double endTime = omp_get_wtime();
+    std::cout << "Elapsed time is " << endTime - startTime << " seconds" << std::endl;
     return maxVal;
 }
 
 int main(){
-    int num_threads = 12;
+    int num_threads = 10;
     omp_set_num_threads(num_threads);
     std::vector<int> vec(10000000);
     std::iota(vec.begin(), vec.end(), 1);
