@@ -1,10 +1,12 @@
+#include <chrono>
 #include <omp.h>
+#include <thread>
 #include <vector>
 #include <iostream>
+#include <thread>
 
 std::vector<int> dotProductOMP(const int& vecLen, const int& vectorsNum){
     std::vector<int> result;
-    result.resize(vectorsNum * vectorsNum);
     std::vector<int> vectors;
     vectors.resize(vecLen * vectorsNum);
     double startTime = omp_get_wtime();
@@ -17,7 +19,7 @@ std::vector<int> dotProductOMP(const int& vecLen, const int& vectorsNum){
             {
 
                 for (int i = 0; i < vectorsNum; i ++) {
-                    #pragma omp parallel for
+                    // #pragma omp parallel for
                     {
                         for (int j = 0; j < vecLen; j ++) {
                             vectors[i * vecLen + j] = i + j;
@@ -74,7 +76,8 @@ std::vector<int> dotProduct(const int& vecLen, const int& vectorsNum){
 
 int main(){
     int vecLen = 1000;
-    int vectorsNum = 1000;
+    int vectorsNum = 100;
+    omp_set_num_threads(6);
     auto resultOMP = dotProductOMP(vecLen, vectorsNum);
     auto result = dotProduct(vecLen, vectorsNum);
     // for (int i = 0; i < resultOMP.size(); i++) {
