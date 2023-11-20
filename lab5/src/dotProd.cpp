@@ -4,7 +4,9 @@
 
 std::vector<int> dotProductOMP(const int& vecLen, const int& vectorsNum){
     std::vector<int> result;
-    int vectors[vectorsNum][vecLen];
+    result.resize(vectorsNum * vectorsNum);
+    std::vector<int> vectors;
+    vectors.resize(vecLen * vectorsNum);
     double startTime = omp_get_wtime();
     #pragma omp parallel shared(vectors)
     {
@@ -15,10 +17,12 @@ std::vector<int> dotProductOMP(const int& vecLen, const int& vectorsNum){
             {
 
                 for (int i = 0; i < vectorsNum; i ++) {
-                    for (int j = 0; j < vecLen; j ++) {
-                        vectors[i][j] = i + j;
+                    #pragma omp parallel for
+                    {
+                        for (int j = 0; j < vecLen; j ++) {
+                            vectors[i * vecLen + j] = i + j;
+                        }
                     }
-                
                 }
             }
             #pragma omp section
@@ -28,7 +32,7 @@ std::vector<int> dotProductOMP(const int& vecLen, const int& vectorsNum){
                     for (int j = 0; j < vectorsNum; j++) {
                         int prod = 0;
                         for (int c = 0; c < vecLen; c++) {
-                            prod += vectors[i][c] * vectors[j][c];
+                            prod += vectors[i * vecLen + c] * vectors[j * vecLen + c];
                         }
                         result.push_back(prod);
                     }
@@ -43,12 +47,13 @@ std::vector<int> dotProductOMP(const int& vecLen, const int& vectorsNum){
 
 std::vector<int> dotProduct(const int& vecLen, const int& vectorsNum){
     std::vector<int> result;
-    int vectors[vectorsNum][vecLen];
+    std::vector<int> vectors;
+    vectors.resize(vecLen * vectorsNum);
     double startTime = omp_get_wtime();
     //load vectors
     for (int i = 0; i < vectorsNum; i ++) {
         for (int j = 0; j < vecLen; j ++) {
-            vectors[i][j] = i + j;
+            vectors[i * vecLen + j] = i + j;
         }
     
     }
@@ -57,7 +62,7 @@ std::vector<int> dotProduct(const int& vecLen, const int& vectorsNum){
         for (int j = 0; j < vectorsNum; j++) {
             int prod = 0;
             for (int c = 0; c < vecLen; c++) {
-                prod += vectors[i][c] * vectors[j][c];
+                prod += vectors[i * vecLen + c] * vectors[j * vecLen + c];
             }
             result.push_back(prod);
         }
@@ -68,10 +73,12 @@ std::vector<int> dotProduct(const int& vecLen, const int& vectorsNum){
 }
 
 int main(){
-    auto resultOMP = dotProductOMP(300, 3);
-    auto result = dotProduct(300, 10);
-    for (int i = 0; i < resultOMP.size(); i++) {
-        std::cout << resultOMP[i] << " " << result[i] << std::endl;
-    }
+    int vecLen = 1000;
+    int vectorsNum = 1000;
+    auto resultOMP = dotProductOMP(vecLen, vectorsNum);
+    auto result = dotProduct(vecLen, vectorsNum);
+    // for (int i = 0; i < resultOMP.size(); i++) {
+    //     std::cout << resultOMP[i] << " " << result[i] << std::endl;
+    // }
     return 0;
 }
