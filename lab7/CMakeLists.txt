@@ -8,3 +8,4 @@ find_package(TBB REQUIRED)
 add_executable(graph src/main.cpp)
 target_link_libraries(graph TBB::tbb)
 
+set_target_properties(graph PROPERTIES CXX_STANDARD 17)
