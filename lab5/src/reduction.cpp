@@ -7,7 +7,7 @@ template <typename T>
 T reductionAtomic(const std::vector<T>& vec){
     T sum = 0;
     double startTime = omp_get_wtime();
-    #pragma parallel for reduction(+ : sum)
+    #pragma parallel for shared(vec) reduction(+ : sum)
     {
         for (int i = 0; i < vec.size(); i++) {
             sum += vec[i];
@@ -22,7 +22,7 @@ template<typename T>
 T reductionCritical(const std::vector<T>& vec){
     T sum = 0;
     double startTime = omp_get_wtime();
-    #pragma omp parallel
+    #pragma omp parallel shared(vec)
     {
         T localSum = 0;
         for (int i = 0; i < vec.size(); i++) {
@@ -41,6 +41,21 @@ T reductionCritical(const std::vector<T>& vec){
 template<typename T>
 T reductionLock(const std::vector<T>& vec){
     T sum = 0;
+    double startTime = omp_get_wtime();
+    omp_lock_t lock;
+    omp_init_lock(&lock);
+    #pragma omp parallel shared(vec)
+    {
+        T localSum = 0;
+        for (int i = 0; i < vec.size(); i++) {
+            localSum += vec[i];
+        }
+        omp_set_lock(&lock);
+        sum += localSum;
+        omp_unset_lock(&lock);
+    }
+    double endTime = omp_get_wtime();
+    std::cout << "Lock elapsed time is " << endTime - startTime << " seconds" << std::endl;
     return sum;
 }
 
@@ -51,5 +66,6 @@ int main(){
     std::iota(vec.begin(), vec.end(), 1);
     reductionAtomic(vec);
     reductionCritical(vec);
+    reductionLock(vec);
     return 0;
 }
