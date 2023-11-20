@@ -3,8 +3,24 @@
 #include <vector>
 #include <numeric>
 
-template <typename T>
+template<typename T>
 T reductionAtomic(const std::vector<T>& vec){
+    T sum = 0;
+    double startTime = omp_get_wtime();
+    #pragma parallel shared(vec)
+    {
+        for (int i = 0; i < vec.size(); i++) {
+            #pragma atomic
+            sum += vec[i];
+        }
+    }
+    double endTime = omp_get_wtime();
+    std::cout << "Atomic elapsed time is " << endTime - startTime << " seconds" << std::endl;
+    return sum;
+}
+
+template <typename T>
+T reductionFor(const std::vector<T>& vec){
     T sum = 0;
     double startTime = omp_get_wtime();
     #pragma parallel for shared(vec) reduction(+ : sum)
@@ -14,7 +30,7 @@ T reductionAtomic(const std::vector<T>& vec){
         }
     }
     double endTime = omp_get_wtime();
-    std::cout << "Atomic elapsed time is " << endTime - startTime << " seconds" << std::endl;
+    std::cout << "For elapsed time is " << endTime - startTime << " seconds" << std::endl;
     return sum;
 }
 
@@ -65,6 +81,7 @@ int main(){
     std::vector<int> vec(100000000);
     std::iota(vec.begin(), vec.end(), 1);
     reductionAtomic(vec);
+    reductionFor(vec);
     reductionCritical(vec);
     reductionLock(vec);
     return 0;
