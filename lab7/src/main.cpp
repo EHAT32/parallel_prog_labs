@@ -23,10 +23,10 @@ void createGraph(){
     //finalNode
     tbb::flow::function_node<std::tuple<int, int>, int> finalNode(graph, tbb::flow::unlimited,
     [](const std::tuple<int, int>& tup) {
-        auto [f, s] = tup;
+        auto [f, s] = tup; //c++ 17
         std::cout << "Nodes finished working: 2 * n1 + 4 * n2 = " << f + s << std::endl; return 0;
     });
-    //finaEdge
+    //finalEdge
     tbb::flow::make_edge(joinNode, finalNode);
     upperNode.try_put(1);
     lowerNode.try_put(2);
