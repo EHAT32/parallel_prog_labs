@@ -63,28 +63,35 @@ float newsseSum(float* arr, const int& size){
     return sum;
 }
 
-float forSum(float* array, const int& size){
-    double startTime = omp_get_wtime();
+float forSum(float* arr, const int& size){
     float sum = 0;
-    #pragma omp parallel for
+    double startTime = omp_get_wtime();
+    #pragma omp parallel shared(arr)
     {
-        for (int i = 0; i < size; i++) {
-            sum += array[i];
+        float localSum = 0;
+        #pragma omp for
+        {
+            for (int i = 0; i < size; i++) {
+                localSum += arr[i];
+            }
+        }
+        #pragma omp critical
+        {
+            sum += localSum;
         }
     }
     double endTime = omp_get_wtime();
     std::cout << "For elapsed time is " << endTime - startTime << " seconds" << std::endl;
     return sum;
 }
-
 int main(){
-    int size = 64;
+    int size = 32768;
     float array[size];
     for (int i = 0; i < size; i++) {
         array[i] = i + 1;
     }
-    int resLin = linearSum(array, size);
-    int resFor = forSum(array, size);
-    int resSSE = newsseSum(array, size);
+    float resLin = linearSum(array, size);
+    float resSSE = newsseSum(array, size);
+    float resCrit = forSum(array, size);
     return 0;
 }
