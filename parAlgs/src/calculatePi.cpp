@@ -1,7 +1,7 @@
 #include <iostream>
 
 template<typename T>
-float rectInt(const T& function, const float& a = 0, const float& b = 1, const int& N = 100000){
+float trapInt(const T& function, const float& a = 0, const float& b = 1, const int& N = 100000){
     float res = 0;
     float x = a;
     float h = (b - a) / N;
@@ -16,6 +16,6 @@ float forPi(const float& x){
 }
 
 int main(){
-    std::cout << rectInt(forPi) << std::endl;
+    std::cout << trapInt(forPi) << std::endl;
     return 0;
 }
