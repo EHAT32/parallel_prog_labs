@@ -6,7 +6,7 @@
 
 float linearSum(float* array, const int& size){
     double startTime = omp_get_wtime();
-    float sum = 0;
+    double sum = 0;
     for (int i = 0; i < size; i++) {
         sum += array[i];
     }
@@ -27,20 +27,19 @@ float sseSum(float* arr, const int& size) {
 }
 
 float sseSum_(float* arr, const int& size){
-    int sum = 0;
+    int n = sizeof(arr) / sizeof(arr[0]);
+    __m128i sum = _mm_setzero_si128();
 
-    __m128i result = _mm_setzero_si128();
-
-    for (int i = 0; i < size; i += 4) {
-        __m128i chunk = _mm_loadu_si128((__m128i*)(arr + i));
-        result = _mm_add_epi32(result, chunk);
+    for (int i = 0; i < sizeof(arr); i += 4) {
+        __m128i data = _mm_loadu_ps(&arr[i]);
+        sum = _mm_add_epi32(sum, data);
     }
 
-    int temp[4];
-    _mm_storeu_si128((__m128i*)temp, result);
+    float result[4];
+    _mm_storeu_si128((__m128i*)result, sum);
 
-    sum = temp[0] + temp[1] + temp[2] + temp[3];
-    return sum;
+    float finalSum = result[0] + result[1] + result[2] + result[3];
+    return finalSum;
 }
 
 float newsseSum(float* arr, const int& size){
@@ -64,9 +63,9 @@ float newsseSum(float* arr, const int& size){
 }
 
 float forSum(float* arr, const int& size){
-    float sum = 0;
+    double sum = 0;
     double startTime = omp_get_wtime();
-    #pragma omp parallel shared(arr) reduction(+ : sum)
+    #pragma omp parallel shared(arr)
     {
         float localSum = 0;
         #pragma omp for
@@ -114,14 +113,14 @@ float sectionsSum(float* arr, const int& size){
     return sum;
 }
 int main(){
-    int size = 32768;
+    int size = 8192 * 4;
     float array[size];
     for (int i = 0; i < size; i++) {
-        array[i] = i + 1;
+        array[i] = 1;
     }
-    float resLin = linearSum(array, size);
-    float resSSE = newsseSum(array, size);
-    float resFor = forSum(array, size);
-    float resSection = sectionsSum(array, size);
+    double resLin = linearSum(array, size);
+    double resSSE = sseSum_(array, size);
+    double resFor = forSum(array, size);
+    double resSection = sectionsSum(array, size);
     return 0;
 }
