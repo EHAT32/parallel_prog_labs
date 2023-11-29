@@ -1,10 +1,13 @@
 #include <iostream>
+#include <vcruntime.h>
+#include <vcruntime_string.h>
 #include <vector>
 #include <cassert>
 #include <xmmintrin.h> 
 #include <omp.h>
+#include <cstring>
 
-float linearSum(float* array, const int& size){
+double linearSum(const float* array, const size_t& size){
     double startTime = omp_get_wtime();
     double sum = 0;
     for (int i = 0; i < size; i++) {
@@ -15,7 +18,7 @@ float linearSum(float* array, const int& size){
     return sum;
 }
 
-float sseSum(float* arr, const int& size) {
+float sseSum(const float* arr, const size_t& size) {
     __m128i sum = _mm_setzero_si128();
     for (int i = 0; i < size; i += 4) {
         __m128i v = _mm_loadu_si128((__m128i*)(arr + i));
@@ -26,7 +29,7 @@ float sseSum(float* arr, const int& size) {
     return result;
 }
 
-float sseSum_(float* arr, const int& size){
+double sseSum_(const float* arr, const size_t& size){
     int n = sizeof(arr) / sizeof(arr[0]);
     __m128i sum = _mm_setzero_si128();
 
@@ -35,14 +38,14 @@ float sseSum_(float* arr, const int& size){
         sum = _mm_add_epi32(sum, data);
     }
 
-    float result[4];
+    double result[4];
     _mm_storeu_si128((__m128i*)result, sum);
 
-    float finalSum = result[0] + result[1] + result[2] + result[3];
+    double finalSum = result[0] + result[1] + result[2] + result[3];
     return finalSum;
 }
 
-float newsseSum(float* arr, const int& size){
+float newsseSum(const float* arr, const size_t& size){
     double startTime = omp_get_wtime();
     float sum = 0;
     int index = 0;
@@ -62,7 +65,7 @@ float newsseSum(float* arr, const int& size){
     return sum;
 }
 
-float forSum(float* arr, const int& size){
+double forSum(const float* arr, const size_t& size){
     double sum = 0;
     double startTime = omp_get_wtime();
     #pragma omp parallel shared(arr)
@@ -84,7 +87,7 @@ float forSum(float* arr, const int& size){
     return sum;
 }
 
-float sectionsSum(float* arr, const int& size){
+float sectionsSum(const float* arr, const size_t& size){
     double startTime = omp_get_wtime();
     float sum = 0;
     float sum1 = 0;
@@ -112,15 +115,33 @@ float sectionsSum(float* arr, const int& size){
     std::cout << "Sections elapsed time is " << endTime - startTime << " seconds" << std::endl;
     return sum;
 }
+
+double cascadeSum(const float* arr, const size_t& size){
+    double startTime = omp_get_wtime();
+    size_t n = size;
+    float y[n];
+    memcpy(y, arr, n);
+    while (n >= 2) {
+        n /= 2;
+        for (size_t i = 0; i < n; i++) {
+            y[i] = y[2 * i] + y[2*i + 1];
+        }
+    }
+    double duration = omp_get_wtime() - startTime;
+    std::cout << "Cascade time is: " << duration << " seconds" << std::endl;
+    return y[0];
+}
+
 int main(){
-    int size = 8192 * 4;
+    size_t size = 8192 * 4;
     float array[size];
     for (int i = 0; i < size; i++) {
         array[i] = 1;
     }
     double resLin = linearSum(array, size);
     double resSSE = sseSum_(array, size);
-    double resFor = forSum(array, size);
     double resSection = sectionsSum(array, size);
-    return 0;
+    double resFor = forSum(array, size);
+    double resCascade = cascadeSum(array, size);
+        return 0;
 }
