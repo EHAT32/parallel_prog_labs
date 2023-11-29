@@ -1,4 +1,5 @@
 #include <iostream>
+#include <ostream>
 #include <vcruntime.h>
 #include <vcruntime_string.h>
 #include <vector>
@@ -14,12 +15,12 @@ float linearSum(const float* array, const size_t& size){
     for (int i = 0; i < size; i++) {
         sum += array[i];
     }
-    double endTime = omp_get_wtime();
-    std::cout << "Linear elapsed time is " << endTime - startTime << " seconds" << std::endl;
-    return sum;
+    double duration = omp_get_wtime() - startTime;
+    return duration;
 }
 
 float sseSum_(const float* arr, const size_t& size){
+    double startTime = omp_get_wtime();
     __m128 sum = _mm_setzero_ps();
 
     for (int i = 0; i < size; i += 4) {
@@ -31,7 +32,8 @@ float sseSum_(const float* arr, const size_t& size){
     _mm_storeu_ps(result, sum);
 
     float finalSum = result[0] + result[1] + result[2] + result[3];
-    return finalSum;
+    double duration = omp_get_wtime() - startTime;
+    return duration;
 }
 
 float forSum(const float* arr, const size_t& size){
@@ -51,9 +53,8 @@ float forSum(const float* arr, const size_t& size){
             sum += localSum;
         }
     }
-    double endTime = omp_get_wtime();
-    std::cout << "For elapsed time is " << endTime - startTime << " seconds" << std::endl;
-    return sum;
+    double duration = omp_get_wtime() - startTime;
+    return duration;
 }
 
 float sectionsSum(const float* arr, const size_t& size){
@@ -80,11 +81,11 @@ float sectionsSum(const float* arr, const size_t& size){
         }
     }
     sum = sum1 + sum2;
-    double endTime = omp_get_wtime();
-    std::cout << "Sections elapsed time is " << endTime - startTime << " seconds" << std::endl;
-    return sum;
+    double duration = omp_get_wtime() - startTime;
+    return duration;
 }
 
+//я сделал копирование на векторе, потому что со стандартным массивом на последней итерации почему-то y[1] становится -nan
 float cascadeSum(const float* arr, const size_t& size){
     float startTime = omp_get_wtime();
     size_t n = size;
@@ -98,21 +99,55 @@ float cascadeSum(const float* arr, const size_t& size){
             }
         }
     }
-    float duration = omp_get_wtime() - startTime;
-    std::cout << "Cascade time is: " << duration << " seconds" << std::endl;
-    return y[0];
+    double duration = omp_get_wtime() - startTime;
+    return duration;
 }
 
-int main(){
-    size_t size = 8192 * 4;
+void experiment(const size_t& size){
     float array[size];
     for (int i = 0; i < size; i++) {
         array[i] = 1;
     }
-    float resLin = linearSum(array, size);
-    float resSSE = sseSum_(array, size);
-    float resSection = sectionsSum(array, size);
-    float resFor = forSum(array, size);
-    float resCascade = cascadeSum(array, size);
+    int N = 1000;
+    double linTime = 0;    
+    double sseTime = 0;
+    double sectionTime = 0;
+    double forTime = 0;
+    double cascadeTime = 0;
+    for (int i = 0; i < N; i++) {
+        linTime += linearSum(array, size);
+        sseTime += sseSum_(array, size);
+        cascadeTime += cascadeSum(array, size);
+        forTime += forSum(array, size);
+        sectionTime += sectionsSum(array, size);
+    }
+    linTime /= N;
+    sseTime /= N;
+    cascadeTime /= N;
+    forTime /= N;
+    sectionTime /= N;
+    std::cout << "For size " << size << std::endl;
+    std::cout << "SSE speed up is " << linTime / sseTime << std::endl;
+    std::cout << "Cascade speed up is " << linTime / cascadeTime << std::endl;
+    std::cout << "OMP for speed up is " << linTime / forTime << std::endl;
+    std::cout << "OMP sections speed up is " << linTime / sectionTime << std::endl;
+    std::cout << "-------------------" << std::endl;
+}
+
+int main(){
+    size_t size = 8192;
+    experiment(size);
+    experiment(size * 2);
+    experiment(size * 4);
     return 0;
 }
+//speed up
+/*
+| method\\size | 8192 | 16384 | 32768 |
+| ------------ | ---- | ----- | ----- |
+| linear       | 1    | 1     | 1     |
+| sse          | 2,42 | 2,42  | 2,45  |
+| cascade      | 0,02 | 0,03  | 0,13  |
+| omp for      | 1,36 | 1,74  | 3,76  |
+| omp sections | 0,44 | 0,49  | 0,49  |
+*/
