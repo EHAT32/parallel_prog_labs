@@ -18,51 +18,19 @@ double linearSum(const float* array, const size_t& size){
     return sum;
 }
 
-float sseSum(const float* arr, const size_t& size) {
-    __m128i sum = _mm_setzero_si128();
-    for (int i = 0; i < size; i += 4) {
-        __m128i v = _mm_loadu_si128((__m128i*)(arr + i));
-        sum = _mm_add_epi32(sum, v);
-    }
-    int result = 0;
-    result += sum[0] + sum[1] + sum[2] + sum[3];
-    return result;
-}
-
 double sseSum_(const float* arr, const size_t& size){
-    int n = sizeof(arr) / sizeof(arr[0]);
-    __m128i sum = _mm_setzero_si128();
+    __m128 sum = _mm_setzero_ps();
 
-    for (int i = 0; i < sizeof(arr); i += 4) {
-        __m128i data = _mm_loadu_ps(&arr[i]);
-        sum = _mm_add_epi32(sum, data);
+    for (int i = 0; i < size; i += 4) {
+        __m128 data = _mm_loadu_ps(&arr[i]);
+        sum = _mm_add_ps(sum, data);
     }
 
-    double result[4];
-    _mm_storeu_si128((__m128i*)result, sum);
+    float result[4];
+    _mm_storeu_ps(result, sum);
 
-    double finalSum = result[0] + result[1] + result[2] + result[3];
+    float finalSum = result[0] + result[1] + result[2] + result[3];
     return finalSum;
-}
-
-float newsseSum(const float* arr, const size_t& size){
-    double startTime = omp_get_wtime();
-    float sum = 0;
-    int index = 0;
-
-    int parts = size / sizeof(float);
-    __m128* xmm_arr = (__m128*)arr;
-
-    while (index < parts)
-    {
-        __m128 xmm_sum = _mm_setzero_ps();
-        xmm_sum = _mm_add_ps(xmm_sum, xmm_arr[index]);
-        _mm_store_ss(&sum, xmm_sum);
-        index++;
-    }
-    double endTime = omp_get_wtime();
-    std::cout << "SSE elapsed time is " << endTime - startTime << " seconds" << std::endl;
-    return sum;
 }
 
 double forSum(const float* arr, const size_t& size){
@@ -138,10 +106,10 @@ int main(){
     for (int i = 0; i < size; i++) {
         array[i] = 1;
     }
-    double resLin = linearSum(array, size);
-    double resSSE = sseSum_(array, size);
-    double resSection = sectionsSum(array, size);
-    double resFor = forSum(array, size);
-    double resCascade = cascadeSum(array, size);
-        return 0;
+    float resLin = linearSum(array, size);
+    float resSSE = sseSum_(array, size);
+    float resSection = sectionsSum(array, size);
+    float resFor = forSum(array, size);
+    float resCascade = cascadeSum(array, size);
+    return 0;
 }
