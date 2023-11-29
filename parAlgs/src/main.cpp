@@ -6,10 +6,11 @@
 #include <xmmintrin.h> 
 #include <omp.h>
 #include <cstring>
+#include <cmath>
 
-double linearSum(const float* array, const size_t& size){
+float linearSum(const float* array, const size_t& size){
     double startTime = omp_get_wtime();
-    double sum = 0;
+    float sum = 0;
     for (int i = 0; i < size; i++) {
         sum += array[i];
     }
@@ -18,7 +19,7 @@ double linearSum(const float* array, const size_t& size){
     return sum;
 }
 
-double sseSum_(const float* arr, const size_t& size){
+float sseSum_(const float* arr, const size_t& size){
     __m128 sum = _mm_setzero_ps();
 
     for (int i = 0; i < size; i += 4) {
@@ -33,8 +34,8 @@ double sseSum_(const float* arr, const size_t& size){
     return finalSum;
 }
 
-double forSum(const float* arr, const size_t& size){
-    double sum = 0;
+float forSum(const float* arr, const size_t& size){
+    float sum = 0;
     double startTime = omp_get_wtime();
     #pragma omp parallel shared(arr)
     {
@@ -84,18 +85,20 @@ float sectionsSum(const float* arr, const size_t& size){
     return sum;
 }
 
-double cascadeSum(const float* arr, const size_t& size){
-    double startTime = omp_get_wtime();
+float cascadeSum(const float* arr, const size_t& size){
+    float startTime = omp_get_wtime();
     size_t n = size;
-    float y[n];
-    memcpy(y, arr, n);
+    std::vector<float> y(n, 1);
     while (n >= 2) {
         n /= 2;
         for (size_t i = 0; i < n; i++) {
             y[i] = y[2 * i] + y[2*i + 1];
+            if (std::isnan(y[1])) {
+                std::cout << "bebe" << std::endl;
+            }
         }
     }
-    double duration = omp_get_wtime() - startTime;
+    float duration = omp_get_wtime() - startTime;
     std::cout << "Cascade time is: " << duration << " seconds" << std::endl;
     return y[0];
 }
