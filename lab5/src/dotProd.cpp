@@ -79,8 +79,8 @@ std::vector<int> dotProduct(const int& vecLen, const int& vectorsNum){
 
 double OMPdot2(const size_t& vecSize){
     double startTime = omp_get_wtime();
-    float result = 0;
-    std::vector<float> vec1, vec2;
+    long result = 0;
+    std::vector<int> vec1, vec2;
     vec1.resize(vecSize);
     vec2.resize(vecSize);
     #pragma omp parallel shared(vec1, vec2)
@@ -108,8 +108,8 @@ double OMPdot2(const size_t& vecSize){
 
 double linearDot2(const size_t& vecSize){
     double startTime = omp_get_wtime();
-    float result = 0;
-    std::vector<float> vec1, vec2;
+    long result = 0;
+    std::vector<int> vec1, vec2;
     vec1.resize(vecSize);
     vec2.resize(vecSize);
 
