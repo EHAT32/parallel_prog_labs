@@ -1,9 +1,12 @@
 #include <chrono>
 #include <omp.h>
 #include <thread>
+#include <vcruntime.h>
 #include <vector>
 #include <iostream>
 #include <thread>
+#include <cassert>
+
 
 std::vector<int> dotProductOMP(const int& vecLen, const int& vectorsNum){
     std::vector<int> result;
@@ -74,14 +77,68 @@ std::vector<int> dotProduct(const int& vecLen, const int& vectorsNum){
     return result;
 }
 
+double OMPdot2(const size_t& vecSize){
+    double startTime = omp_get_wtime();
+    float result = 0;
+    std::vector<float> vec1, vec2;
+    vec1.resize(vecSize);
+    vec2.resize(vecSize);
+    #pragma omp parallel shared(vec1, vec2)
+    {
+        #pragma omp sections
+        {
+            #pragma omp section
+            {
+                for (size_t i = 0; i < vecSize; i++) {
+                    vec1[i] = i;
+                    vec2[i] = 2*i;
+                }
+            }
+            #pragma omp section
+            {
+                for (size_t i = 0; i < vecSize; i++) {
+                    result += vec1[i] * vec2[i];
+                }
+            }
+        }
+    }
+    auto dur = omp_get_wtime() - startTime;
+    return dur;
+}
+
+double linearDot2(const size_t& vecSize){
+    double startTime = omp_get_wtime();
+    float result = 0;
+    std::vector<float> vec1, vec2;
+    vec1.resize(vecSize);
+    vec2.resize(vecSize);
+
+    for (size_t i = 0; i < vecSize; i++) {
+        vec1[i] = i;
+        vec2[i] = 2*i;
+    }
+
+    for (size_t i = 0; i < vecSize; i++) {
+        result += vec1[i] * vec2[i];
+    }
+    // std::cout << "Linear time is: " << omp_get_wtime() - startTime << " seconds\n";
+    auto dur = omp_get_wtime() - startTime;
+    return dur;
+}
+
 int main(){
-    int vecLen = 1000;
-    int vectorsNum = 100;
-    omp_set_num_threads(6);
-    auto resultOMP = dotProductOMP(vecLen, vectorsNum);
-    auto result = dotProduct(vecLen, vectorsNum);
-    // for (int i = 0; i < resultOMP.size(); i++) {
-    //     std::cout << resultOMP[i] << " " << result[i] << std::endl;
-    // }
+    size_t vecLen = 100000;
+    omp_set_num_threads(2);
+    double ompTime = 0;
+    double linTime = 0;
+    int expNum = 1000;
+    for (int i = 0; i < expNum; i++) {
+        ompTime += OMPdot2(vecLen);
+        linTime += linearDot2(vecLen);
+    }
+    ompTime /= expNum;
+    linTime /= expNum;
+    std::cout << "Linear time is: " << linTime << " seconds\n";
+    std::cout << "OMP time is: " << ompTime << " seconds\n";
     return 0;
 }
