@@ -91,12 +91,13 @@ float cascadeSum(const float* arr, const size_t& size){
     size_t n = size;
     std::vector<float> y(n, 1);
     while (n >= 2) {
+        int prevN = n;
         n /= 2;
         for (size_t i = 0; i < n; i++) {
             y[i] = y[2 * i] + y[2*i + 1];
-            if (std::isnan(y[1])) {
-                std::cout << "bebe" << std::endl;
-            }
+        if (prevN % 2) {
+            y[0] += y[prevN - 1];
+        }
         }
     }
     double duration = omp_get_wtime() - startTime;
